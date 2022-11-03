@@ -76,4 +76,4 @@ def make_app():
     app.add_route(
         "/test_custom_response_headers", CustomResponseHeaderResource()
     )
-    return app
+    return
