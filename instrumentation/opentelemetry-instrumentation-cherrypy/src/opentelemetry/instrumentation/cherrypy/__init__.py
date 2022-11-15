@@ -59,10 +59,7 @@ class _InstrumentationHook(cherrypy.Tool):
     
     def _on_start_resource_hook(self):
         environ = cherrypy.serving.request.wsgi_environ
-        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(environ.get('PATH_INFO', '/')):
-            return
-        
-        if not self._is_instrumented_by_opentelemetry:
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(environ.get('PATH_INFO', '/')) or not self._is_instrumented_by_opentelemetry:
             return
         
         start_time = time_ns()
@@ -99,25 +96,19 @@ class _InstrumentationHook(cherrypy.Tool):
         
 
     def _before_finalize_hook(self):
-        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
-            return
-        if not self._is_instrumented_by_opentelemetry:
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')) or not self._is_instrumented_by_opentelemetry:
             return
         propagator = get_global_response_propagator()
         if propagator:
             propagator.inject(cherrypy.serving.response.headers, setter=otel_wsgi.default_response_propagation_setter)
     
     def _after_error_response_hook(self):
-        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
-            return
-        if not self._is_instrumented_by_opentelemetry:
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')) or not self._is_instrumented_by_opentelemetry:
             return
         _, self.exception, _ = exc_info()
 
     def _on_end_request_hook(self):
-        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
-            return
-        if not self._is_instrumented_by_opentelemetry:
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')) or not self._is_instrumented_by_opentelemetry:
             return
         if self.span:
             otel_wsgi.add_response_attributes(self.span, cherrypy.serving.response.status, cherrypy.serving.response.headers)
