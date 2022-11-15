@@ -61,7 +61,7 @@ class _InstrumentationHook(cherrypy.Tool):
     
     def _on_start_resource_hook(self):
         environ = cherrypy.serving.request.wsgi_environ
-        if self._otel_excluded_urls.url_disabled(environ.get('PATH_INFO', '/')):
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(environ.get('PATH_INFO', '/')):
             return
         
         if not self._is_instrumented_by_opentelemetry:
@@ -101,6 +101,8 @@ class _InstrumentationHook(cherrypy.Tool):
         
 
     def _before_finalize_hook(self):
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
+            return
         if not self._is_instrumented_by_opentelemetry:
             return
         propagator = get_global_response_propagator()
@@ -108,6 +110,8 @@ class _InstrumentationHook(cherrypy.Tool):
             propagator.inject(cherrypy.serving.response.headers, setter=otel_wsgi.default_response_propagation_setter)
     
     def _on_end_resource_hook(self):
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
+            return
         if not self._is_instrumented_by_opentelemetry:
             return
         if self.span:
@@ -116,16 +120,20 @@ class _InstrumentationHook(cherrypy.Tool):
             if status_code is not None:
                 self.duration_attrs[SpanAttributes.HTTP_STATUS_CODE] = status_code
             if self.span.is_recording() and self.span.kind == trace.SpanKind.SERVER:
-                custom_attributes = otel_wsgi.collect_custom_response_headers_attributes(cherrypy.serving.response.headers)
+                custom_attributes = otel_wsgi.collect_custom_response_headers_attributes(cherrypy.serving.response.headers.items())
                 if len(custom_attributes) > 0:
                     self.span.set_attributes(custom_attributes)
     
     def _after_error_response_hook(self):
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
+            return
         if not self._is_instrumented_by_opentelemetry:
             return
-        self.exception = exc_info()
+        _, self.exception, _ = exc_info()
 
     def _on_end_request_hook(self):
+        if self._otel_excluded_urls and self._otel_excluded_urls.url_disabled(cherrypy.serving.request.wsgi_environ.get('PATH_INFO', '/')):
+            return
         if not self._is_instrumented_by_opentelemetry:
             return
         if self.exception is None:
@@ -154,6 +162,7 @@ class CherryPyInstrumentor(BaseInstrumentor):
     def _instrument(self, **kwargs):
         self.original_expose = cherrypy.expose
         self.otel_tool = _InstrumentationHook(**kwargs)
+        setattr(cherrypy.tools, _TOOL_NAME, self.otel_tool)
         tool_decorator = self.otel_tool()
         def _Instrumented_expose(func=None, alias=None):
             decoratable_types = types.FunctionType, types.MethodType, type,
@@ -169,4 +178,4 @@ class CherryPyInstrumentor(BaseInstrumentor):
         cherrypy.expose = _Instrumented_expose
 
     def _uninstrument(self, **kwargs):
-        self.otel_tool._is_instrumented_by_opentelemetry = false
+        self.otel_tool._is_instrumented_by_opentelemetry = False
