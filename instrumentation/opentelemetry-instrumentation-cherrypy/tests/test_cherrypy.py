@@ -133,7 +133,6 @@ class TestCherryPyInstrumentation(TestCherryPyBase, WsgiTestBase):
 
     def _test_method(self, method):
         res = self.call(method=method, url="/hello")
-        print(res)
         self.assertEqual(res[0],'200 OK')
 
         spans = self.memory_exporter.get_finished_spans()
