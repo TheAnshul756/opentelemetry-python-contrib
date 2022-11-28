@@ -60,6 +60,10 @@ _recommended_attrs = {
 class TestCherryPyBase(TestBase, helper.CPWebCase):
     def setUp(self):
         super().setUp()
+        resource = Resource.create({"resource-key": "resource-value"})
+        result = self.create_tracer_provider(resource=resource)
+        tracer_provider, exporter = result
+        self.exporter = exporter
         self.env_patch = patch.dict(
             "os.environ",
             {
@@ -72,12 +76,12 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
         CherryPyInstrumentor().instrument(
             request_hook=getattr(self, "request_hook", None),
             response_hook=getattr(self, "response_hook", None),
+            tracer_provider=tracer_provider
         )
 
     
     def call(self, *args, **kwargs):
         return self.getPage(*args, **kwargs)
-        
     
     def setup_server():
         class CherryPyApp(object):
@@ -102,7 +106,7 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
                 raise cherrypy.HTTPError(500, 'error')
 
         return cherrypy.tree.mount(CherryPyApp())
-
+        
     setup_server = staticmethod(setup_server)
 
     def tearDown(self):
@@ -212,6 +216,16 @@ class TestCherryPyInstrumentation(TestCherryPyBase, WsgiTestBase):
             },
         )
         self.memory_exporter.clear()
+    
+    def test_traced_request(self):
+        res = self.call(method="GET", url="/hello")
+        spans = self.exporter.get_finished_spans()
+        self.assertEqual(len(spans), 1)
+        span = spans[0]
+        self.assertEqual(
+            span.resource.attributes["resource-key"], "resource-value"
+        )
+        self.exporter.clear()
 
     # def test_uninstrument(self):
     #     self.call(method="GET", url="/healthzz")
@@ -224,4 +238,6 @@ class TestCherryPyInstrumentation(TestCherryPyBase, WsgiTestBase):
     #     self.setup_server()
     #     spans = self.memory_exporter.get_finished_spans()
     #     self.assertEqual(len(spans), 0)
+
+
     
