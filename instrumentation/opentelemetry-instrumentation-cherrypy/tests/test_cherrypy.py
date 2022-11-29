@@ -78,7 +78,7 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
         self.setup_server()
         return self.getPage(*args, **kwargs)
         
-    
+    @staticmethod
     def setup_server():
         class CherryPyApp(object):
             @cherrypy.expose
@@ -103,7 +103,7 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
 
         return cherrypy.tree.mount(CherryPyApp())
 
-    setup_server = staticmethod(setup_server)
+    # setup_server = staticmethod(setup_server)
 
     def tearDown(self):
         super().tearDown()
@@ -295,7 +295,7 @@ class TestCherryPyInstrumentation(TestCherryPyBase, WsgiTestBase):
                         dict(point.attributes),
                     )
                     self.assertEqual(point.value, 0)
-                    
+
     def test_basic_post_request_metric_success(self):
         start = default_timer()
         self.setup_server()

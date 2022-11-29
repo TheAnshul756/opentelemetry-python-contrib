@@ -3,8 +3,8 @@ OpenTelemetry CherryPy Tracing
 
 |pypi|
 
-.. |pypi| image:: https://badge.fury.io/py/opentelemetry-instrumentation-cherrypy.svg
-   :target: https://pypi.org/project/opentelemetry-instrumentation-cherrypy/
+.. |pypi| image:: todo
+   :target: todo
 
 This library builds on the OpenTelemetry WSGI middleware to track web requests
 in CherryPy applications.
@@ -22,7 +22,7 @@ Configuration
 Exclude lists
 *************
 To exclude certain URLs from being tracked, set the environment variable ``OTEL_PYTHON_CHERRYPY_EXCLUDED_URLS``
-(or ``OTEL_PYTHON_CHERRYPY_URLS`` as fallback) with comma delimited regexes representing which URLs to exclude.
+(or ``OTEL_PYTHON_EXCLUDED_URLS`` as fallback) with comma delimited regexes representing which URLs to exclude.
 
 For example,
 
