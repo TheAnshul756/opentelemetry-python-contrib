@@ -3,8 +3,8 @@ OpenTelemetry CherryPy Tracing
 
 |pypi|
 
-.. |pypi| image:: todo
-   :target: todo
+.. |pypi| image:: TODO
+   :target: TODO
 
 This library builds on the OpenTelemetry WSGI middleware to track web requests
 in CherryPy applications.

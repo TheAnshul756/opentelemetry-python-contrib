@@ -103,8 +103,6 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
 
         return cherrypy.tree.mount(CherryPyApp())
 
-    # setup_server = staticmethod(setup_server)
-
     def tearDown(self):
         super().tearDown()
         with self.disable_logging():
@@ -311,4 +309,6 @@ class TestCherryPyInstrumentation(TestCherryPyBase, WsgiTestBase):
                     self.assertAlmostEqual(duration, point.sum, delta=30)
                 if isinstance(point, NumberDataPoint):
                     self.assertEqual(point.value, 0)
+    
+    
     
