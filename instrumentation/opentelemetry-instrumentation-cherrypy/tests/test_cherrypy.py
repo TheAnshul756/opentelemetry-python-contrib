@@ -313,8 +313,6 @@ class TestCherryPyAutoInstrumentation(TestCherryPyBase, WsgiTestBase):
                     self.assertEqual(point.count, 1)
                     self.assertAlmostEqual(duration, point.sum, delta=30)
                 if isinstance(point, NumberDataPoint):
-                    print(expected_requests_count_attributes)
-                    print(dict(point.attributes))
                     self.assertDictEqual(
                         expected_requests_count_attributes,
                         dict(point.attributes),
