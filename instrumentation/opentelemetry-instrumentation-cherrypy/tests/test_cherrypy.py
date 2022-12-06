@@ -119,7 +119,7 @@ class TestCherryPyBase(TestBase, helper.CPWebCase):
                 content = {"message": "hello world"}
                 return content
 
-        cherrypy.tree.mount(CherryPyApp())
+        return cherrypy.tree.mount(CherryPyApp())
 
     def tearDown(self):
         super().tearDown()
@@ -366,7 +366,7 @@ class TestCherryPyCustomHeaders(TestBase, helper.CPWebCase):
                 content = {"message": "hello world"}
                 return content
 
-        cherrypy.tree.mount(CherryPyApp())
+        return cherrypy.tree.mount(CherryPyApp())
 
     def tearDown(self):
         super().tearDown()
@@ -492,7 +492,7 @@ class TestNonRecordingSpanWithCustomHeaders(TestBase, helper.CPWebCase):
                 content = {"message": "hello world"}
                 return content
 
-        cherrypy.tree.mount(CherryPyApp())
+        return cherrypy.tree.mount(CherryPyApp())
 
     def tearDown(self):
         super().tearDown()
